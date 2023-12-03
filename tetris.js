@@ -174,22 +174,22 @@ class Table {
                c.drawImage(this.red,j*zoom,i*zoom);
             }else if(mapaBlocos1[i][j] == 0){
                c.drawImage(this.image,(j)*zoom,i*zoom);
+            }else if(mapaBlocos1[i][j] == -10){
+               c.fillStyle = "rgba(255, 255, 255, 0.1)";
+               c.fillRect(zoom, i * zoom, canvas.width, zoom);
             }
          }
       }
    }
    breakLine(){
       for(let i = 0; i < this.shape.length - 1;i++){
-         let filtered = this.shape[i].filter(l => l == 0);
+         let filtered = this.shape[i].filter(l => l == 0 || l == -10);
          if(!(filtered.length > 0)){
-            c.fillStyle = "rgba(255, 255, 255, 0.3)";
-            for (let flashCount = 0; flashCount < 5; flashCount++) {
-                setTimeout(() => {
-                    c.fillRect(zoom, i * zoom, canvas.width, zoom);
-                }, flashCount * 200);
-            }
-            this.shape.splice(i, 1);  
-            this.shape.unshift([3,0,0,0,0,0,0,0,0,0,0,3]);
+            this.shape[i] = [3,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,3]
+            setTimeout(() => {
+               this.shape.splice(i, 1);  
+               this.shape.unshift([3,0,0,0,0,0,0,0,0,0,0,3]);
+            }, 500);
          }
       }
    }
