@@ -219,6 +219,7 @@ const keys = {
        this.updateTime = 10;
        this.newBlock = true;
        this.enemies = [];
+       this.finished = false;
        this.initializeBlocos();
     }
  
@@ -259,22 +260,24 @@ const keys = {
     }
  
     draw() {
-       for (let i = 0; i < this.shape.length - 1; i++) {
-          for (let j = 1; j <= this.shape[0].length - 1; j++) {
-             if (this.shape[i][j] && this.shape[i][j] != "9") {
-                c.globalAlpha = 1;
-                c.drawImage(images.get(this.shape[i][j]).img, this.tableBeginPosition + j * BLOCK_SIZE, i * BLOCK_SIZE);
-             } else if (this.shape[i][j] != "9") {
-                c.globalAlpha = 1 / 3;
-                c.strokeStyle = "white";
-                c.strokeRect(this.tableBeginPosition + j * BLOCK_SIZE, i * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-             }
-          }
-       }
-       this.drawBlockShadow();
-       this.drawListBlock();
-       this.drawStore();
-       this.drawEnemies();
+      if(!this.finished){
+         for (let i = 0; i < this.shape.length - 1; i++) {
+            for (let j = 1; j <= this.shape[0].length - 1; j++) {
+               if (this.shape[i][j] && this.shape[i][j] != "9") {
+                  c.globalAlpha = 1;
+                  c.drawImage(images.get(this.shape[i][j]).img, this.tableBeginPosition + j * BLOCK_SIZE, i * BLOCK_SIZE);
+               } else if (this.shape[i][j] != "9") {
+                  c.globalAlpha = 1 / 3;
+                  c.strokeStyle = "white";
+                  c.strokeRect(this.tableBeginPosition + j * BLOCK_SIZE, i * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+               }
+            }
+         }
+         this.drawBlockShadow();
+         this.drawListBlock();
+         this.drawStore();
+      }
+      this.drawEnemies();
     }
     
     drawEnemies() {
@@ -481,6 +484,11 @@ const keys = {
        this.blocos.shift();
        this.bloco = this.blocos[0];
        this.blocos.push(new Bloco({ position: { x: 4, y: 0 }, shadowPosition: { x: 4, y: 0 } }));
+       let colisao = this.calcularColisao();
+       if(colisao){
+           this.finished = true;
+           return;  
+       }
        this.setBlocoInterval();
     }
  
@@ -508,21 +516,22 @@ const keys = {
  const table = new Table();
  
  function animate() {
-    requestAnimationFrame(animate);
-    table.c.clearRect(0, 0, table.canvas.width, table.canvas.height);
-    table.update();
-    table.bloco.update();
-    if (table.bloco.setted) {
-       table.createNewBloco();
-    }
-    if(conn){
-      let body = {};
-      body.shape = table.shape;
-      body.bloco = table.bloco;
-      body.id = GUEST;
-      conn.send(JSON.stringify(body));
-    }
-   
+      requestAnimationFrame(animate);
+      table.c.clearRect(0, 0, table.canvas.width, table.canvas.height);
+      table.update();
+      if(!table.finished){
+         table.bloco.update();
+         if (table.bloco.setted) {
+            table.createNewBloco();
+         }
+         if(conn){
+           let body = {};
+           body.shape = table.shape;
+           body.bloco = table.bloco;
+           body.id = GUEST;
+           conn.send(JSON.stringify(body));
+         }
+      }
  }
  
  animate();
@@ -598,7 +607,7 @@ const keys = {
  window.onload = function () {
 
    if (window["WebSocket"]) {
-       conn = new WebSocket("ws://localhost:8080/ws?id=teste222&idPlayer="+GUEST);
+       conn = new WebSocket("ws://8.tcp.ngrok.io:18281/ws?id=teste222&idPlayer="+GUEST);
        conn.onclose = function (evt) {
             console.log(evt);
        };
@@ -621,4 +630,8 @@ const keys = {
    }
 };
 
+
+window.addEventListener('beforeunload', function (event) {
+   conn.close();
+});
 
