@@ -2,6 +2,8 @@
 
 this is a simple tetris game made with javascript
 
+i`m currently working on an api to make a tetris battle royale , just like we have on [www.tetr](https://tetr.io/).
+
 ## Structure
 ```shell
 tetris
