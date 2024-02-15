@@ -8,7 +8,7 @@ tetris
 ├── tetris.js
 └── tetris.html
 ```
-open the tetris.html file in you brwose to see how the game works
+open the tetris.html file in you browse to see how the game works
 
 
 
